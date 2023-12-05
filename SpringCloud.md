@@ -1445,7 +1445,8 @@ channel是操作MQ的工具；queue缓存消息，负责提供消息给具体服
 基础消息队列包含三种角色：
 
 - publisher：消息发布者，将消息发布到queue
-- queue：消息队列，负责接收消息并缓存
+  - queue：消息队列，负责接收消息并缓存
+
 - consumer：订阅者，处理队列中的消息
 
 ![](C:\Users\haiyunshi\Desktop\笔记\img\基础消息模型.png)
@@ -3148,3 +3149,226 @@ GET /test2/_search
 }
 ```
 
+### RestClient实现自动补全
+
+要使用自动补全，索引库需要将相关字段设置成suggestion属性，并且配置合适的分词器，因此我们使用如下DSL语句创建一个用于测试自动补全的索引库。
+
+```json
+PUT /hotel
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "text_anlyzer": {
+          "tokenizer": "ik_max_word",
+          "filter": "py"
+        },
+        "completion_analyzer": {
+          "tokenizer": "keyword", // 该分词器不进行分词
+          "filter": "py" // 该分词器允许转拼音
+        }
+      },
+      "filter": {
+        "py": {
+          "type": "pinyin",
+          "keep_full_pinyin": false,
+          "keep_joined_full_pinyin": true,
+          "keep_original": true,
+          "limit_first_letter_length": 16,
+          "remove_duplicated_term": true,
+          "none_chinese_pinyin_tokenize": false
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id":{
+        "type": "keyword"
+      },
+      "name":{
+        "type": "text",
+        "analyzer": "text_anlyzer",
+        "search_analyzer": "ik_smart",
+        "copy_to": "all"
+      },
+      "address":{
+        "type": "keyword",
+        "index": false
+      },
+      "price":{
+        "type": "integer"
+      },
+      "score":{
+        "type": "integer"
+      },
+      "brand":{
+        "type": "keyword",
+        "copy_to": "all"
+      },
+      "city":{
+        "type": "keyword"
+      },
+      "starName":{
+        "type": "keyword"
+      },
+      "business":{
+        "type": "keyword",
+        "copy_to": "all"
+      },
+      "location":{
+        "type": "geo_point"
+      },
+      "pic":{
+        "type": "keyword",
+        "index": false
+      },
+      "all":{
+        "type": "text",
+        "analyzer": "text_anlyzer",
+        "search_analyzer": "ik_smart"
+      },
+      "suggestion":{
+          "type": "completion",
+          "analyzer": "completion_analyzer" // 用于实现补全功能的字段，不需要对其分词
+      }
+    }
+  }
+}
+```
+
+想要使用RestClient实现的DSL语句：
+
+```json
+GET /hotel/_search
+{
+  "suggest": {
+    "sgg": {
+      "text": "h",
+      "completion": {
+        "field": "suggestion",
+        "skipDuplicates": true,
+        "size": 10
+      }
+    }
+  }
+}
+```
+
+该DSL语句返回的查询结果：
+
+```json
+{
+  "took" : 1,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 0,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  },
+  "suggest" : {
+    "sgg" : [
+      {
+        "text" : "上",
+        "offset" : 0,
+        "length" : 1,
+        "options" : [
+          {
+            "text" : "三里屯",
+            "_index" : "hotel",
+            "_type" : "_doc",
+            "_id" : "396189",
+            "_score" : 1.0,
+            "_source" : {
+              "address" : "三丰北里3号",
+              "brand" : "皇冠假日",
+              "business" : "三里屯/工体/东直门地区",
+              "city" : "北京",
+              "id" : 396189,
+              "location" : "39.92129, 116.43847",
+              "name" : "北京朝阳悠唐皇冠假日酒店",
+              "pic" : "https://m.tuniucdn.com/fb3/s1/2n9c/tT6ipLain1ZovR5gnQ7tJ4KKym5_w200_h200_c1_t0.jpg",
+              "price" : 944,
+              "score" : 46,
+              "starName" : "五钻",
+              "suggestion" : [
+                "皇冠假日",
+                "三里屯",
+                "工体",
+                "东直门地区"
+              ]
+            }
+          }
+          // 省略其他结果，足够展示返回结果的文本结构
+        ]
+      }
+    ]
+  }
+}
+```
+
+*RestClient测试代码*
+
+```java
+@Test
+void testSuggest() throws IOException {
+    SearchRequest request = new SearchRequest("hotel");
+	// 对应DSL语句的"suggest"
+    request.source().suggest(new SuggestBuilder()
+            //对应DSL语句中：声明suggestion名称，以及声明补全字段为suggestion
+            .addSuggestion("sgg", SuggestBuilders.completionSuggestion("suggestion")
+                    .prefix("h") // 对应指定text
+                    .skipDuplicates(true)
+                    .size(10)));
+
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+
+    // 获取了名为sgg的对象，对应返回结果中suggest下的sgg
+    CompletionSuggestion sgg = response.getSuggest().getSuggestion("sgg");
+	// 获取sgg下的options，options包含了所有结果文档
+    List<CompletionSuggestion.Entry.Option> options = sgg.getOptions();
+
+    options.forEach(option -> {
+        // 对于每个option，获取text值，即自动补全功能匹配到的值
+        String text = option.getText().toString();
+        System.out.println(text);
+    });
+}
+```
+
+**总之，使用RestClient编写Java代码查询ES，一个很好的方法就是对照DSL语句进行编写，RestClient所给的API与DSL语句的诸多关键字基本匹配。**
+
+### 数据同步
+
+一般的项目中，ES中的数据来源于MySQL，因此MySQL数据变更时ES必须跟着进行变化，这就是ES和数据库之间的**数据同步**。
+
+在单体架构中，可以在插入数据的过程中先写入MySQL再写入ES，即可实现数据同步。但是微服务的情景下，不同服务间相互不可访问数据库，因此需要使用其他方法完成数据同步。
+
+#### 数据同步问题的解决方案
+
+![](assets/SpringCloud.assets/1-17017656391662.png)
+
+同步调用实现简单，但是耦合度高，若一个环节出错则会影响到别的环节。
+
+![](assets/SpringCloud.assets/1-17017656058041.png)
+
+使用MQ中间件来异步通知ES服务完成数据同步，能够解除一定耦合，提高服务执行速度也能避免连环故障；但是需要依赖MQ的可靠性，MQ故障则会导致数据的不一致等问题。
+
+![](assets/SpringCloud.assets/1-17017657416333.png)
+
+使用MySQL自带的binlog当MySQL写数据时binlog新增日志，只需要监听binlog即可在数据新增时自动为ES同步数据。这种方案完全解耦，但是binlog的开启会为MySQL服务器带来压力。
+
+### ES集群
+
+#### ES集群结构
+
+单机的ES做数据存储会遇到两个问题：海量数据存储问题和单点故障问题。通过多台服务器构成ES集群能够解决这两个问题。
