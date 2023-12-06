@@ -1,3 +1,9 @@
+# SpringCloud
+
+[TOC]
+
+
+
 # 0 - 认识微服务
 
 ### 单体架构
@@ -31,7 +37,7 @@
 
 常见的微服务落地技术对比：
 
-![](assets/SpringCloud.assets/微服务技术对比.png)
+![](assets/SpringCloud.assets/微服务技术对比-17017806184121.png)
 
 其中Spring Cloud是目前全球使用最广泛的微服务框架，而Spring Cloud Alibaba可以看作其组件。
 
@@ -84,7 +90,7 @@ public class OrderService {
 
 ## 2 - Eureka注册中心
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Eureka关系图.png)
+![](assets/SpringCloud.assets/Eureka关系图.png)
 
 在Eureka架构中，有两种角色：
 
@@ -322,7 +328,7 @@ public class OrderService {
 
 7. 接下来函数层层返回，由LoadBalancerInterceptor将处理完的url发送给被选中的服务。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\负载均衡流程.png)
+![](assets/SpringCloud.assets/负载均衡流程.png)
 
 ### 负载均衡策略
 
@@ -330,13 +336,13 @@ public class OrderService {
 
 *IRule的继承关系图*
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\IRule继承关系.png)
+![](assets/SpringCloud.assets/IRule继承关系.png)
 
 **默认的实现是使用了ZoneAvoidanceRule类。**
 
 *各负载均衡策略的描述*
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\负载均衡策略.png)
+![](assets/SpringCloud.assets/负载均衡策略.png)
 
 ### 自定义负载均衡策略
 
@@ -440,7 +446,7 @@ spring:
 
 Nacos服务分级一般从高到低分为服务、集群、实例，将服务实例分开存储能够提供容灾降级等诸多好处。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Nacos服务分级.png)
+![](assets/SpringCloud.assets/Nacos服务分级.png)
 
 #### 把服务部署到集群
 
@@ -479,7 +485,7 @@ Nacos界面为我们提供了很方便的权重调整功能，权重越低被选
 
 Nacos使用namespace完成环境隔离的功能，Nacos中的服务存储和数据存储的最外层都是namespace，用于最外层隔离。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Nacos环境隔离.png)
+![](assets/SpringCloud.assets/Nacos环境隔离.png)
 
 namespace的创建可以通过Nacos的监控页面方便地完成，需要注意的是，namespace的id很重要，当不手动设置id时，Nacos会通过UUID唯一的生成，因此手动设置时也应该保证namespace的id唯一。
 
@@ -500,7 +506,7 @@ spring:
 
 ### Nacos注册中心细节
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Nacos注册中心细节.png)
+![](assets/SpringCloud.assets/Nacos注册中心细节.png)
 
 Eureka和Nacos都会在消费者端使用服务列表缓存，以减轻频繁拉取服务列表的开销，但是Eureka只会定时拉取服务，而Nacos会在服务提供者的状态更改时主动推送消息给消费者，服务列表的更新更及时。
 
@@ -528,7 +534,7 @@ Eureka采用AP方式；而Nacos默认是AP方式，当集群中有非临时实�
 
 ### 配置获取的步骤
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\配置获取步骤.png)
+![](assets/SpringCloud.assets/配置获取步骤.png)
 
 服务启动时，需要先读取Nacos配置文件，再读取本地配置文件进行合并。但是Nacos之前同样需要配置文件来指引服务去哪寻找Nacos以及读取Nacos哪个配置文件。而bootstrap配置文件是一个优先级高于本地配置文件的配置文件，因此应当创建bootstrap配置文件存放Nacos服务的地址以及想要读取的Nacos配置文件的名字。
 
@@ -641,7 +647,7 @@ public String now() {
 
 可以使用Nginx代理多个Nacos节点，构成一个Nacos集群：
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Nacos集群.png)
+![](assets/SpringCloud.assets/Nacos集群.png)
 
 这里Nginx的作用是接收外来的请求并作负载均衡处理，再送达某一台Nacos节点。不要跟Nacos为送达服务集群的请求作负载均衡混淆。而MySQL集群是用来存放Nacos所需要的数据，例如我们在Nacos监控页面创建的配置文件等。
 
@@ -705,7 +711,7 @@ public Order queryOrderById(Long orderId) {
 
 可以在配置文件中给出自定义配置，Feign将用其来覆盖默认配置，可以修改的一些重要配置如下：
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Feign配置.png)
+![](assets/SpringCloud.assets/Feign配置.png)
 
 #### 修改日志级别
 
@@ -803,19 +809,19 @@ feign:
 
 这种方式给消费者和提供者先定义一个统一的接口为标准——这是因为Feign远程调用代码与服务Controller代码很相似因此能够实现，然后由消费者和提供者分别继承和实现。但这种方法会导致服务紧耦合。尽管Spring官方不推荐这种做法，并且Spring MVC不为其提供舒适的支持——形参上的注解不会被继承，但是这种实践方式也是有在使用的。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Feign最佳实践-继承.png)
+![](assets/SpringCloud.assets/Feign最佳实践-继承.png)
 
 #### “抽取”思想
 
 这种方式让服务提供者将FeignClient抽取为独立的模块/jar包，并且把有关的pojo、默认的Feign配置放在里面，提供给所有消费者使用。能够显著降低服务消费者的编码成本。并且没有紧耦合的缺点。但是它提供的模块往往是全面的，如果消费者只想使用api中的一部分功能，则也必须将模块全部引入，可能导致体积变大。因此两种实践方式各有优劣，实际项目中还是得根据需求来选择。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Feign最佳实践-抽取.png)
+![](assets/SpringCloud.assets/Feign最佳实践-抽取.png)
 
 ## 7 - 统一网关Gateway
 
 ### 网关的作用
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Gateway网关概述.png)
+![](assets/SpringCloud.assets/Gateway网关概述.png)
 
 ### 网关的技术实现
 
@@ -867,19 +873,19 @@ spring:
 
 我们在配置文件的predicates属性下所写的断言规则只是字符串，这些字符串在运行过程中会被路由断言工厂所读取，解析成真正的路由判断条件。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\基本断言工厂.png)
+![](assets/SpringCloud.assets/基本断言工厂.png)
 
 ### 路由过滤器
 
 GatewayFilter是网关中提供的一种过滤器，可以对进入网关的请求和微服务返回的相应做处理。如下图所示，外来的请求会先经过路由获得确切访问地址，然后穿过过滤器链，被每个过滤器处理，最后到达服务。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\路由过滤器流程.png)
+![](assets/SpringCloud.assets/路由过滤器流程.png)
 
 #### 过滤器工厂
 
 路由过滤器与路由断言一样，也是通过过滤器工厂来实现的。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\过滤器工厂.png)
+![](assets/SpringCloud.assets/过滤器工厂.png)
 
 路由过滤器种类很多，但是我们可以在要使用的时候再去官网查阅使用方法。配置路由过滤器的方法并不难，只需要在配置文件仿照官网的示例加上配置即可。接下来以AddRequestHeader为例演示：
 
@@ -1122,7 +1128,7 @@ DockerHub是一个Docker镜像托管平台，类似于GitHub。这样的平台�
 
 #### Docker架构
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Docker架构.png)
+![](assets/SpringCloud.assets/Docker架构.png)
 
 ### 镜像基本操作
 
@@ -1130,13 +1136,13 @@ DockerHub是一个Docker镜像托管平台，类似于GitHub。这样的平台�
 
 *基础命令一图流*
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\docker基础操作.png)
+![](assets/SpringCloud.assets/docker基础操作.png)
 
 **注意**，如果docker命令显示服务端拒绝，可能是防火墙拦截了请求，或者是用户权限不够，如果问题是后者可以开启超级用户权限，前者可以视情况关闭防火墙，但如果是云服务器要注意防火墙关闭会带来一定的安全风险。
 
 ### 容器相关命令
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\容器相关命令.png)
+![](assets/SpringCloud.assets/容器相关命令.png)
 
 #### 创建运行一个Docker容器
 
@@ -1186,11 +1192,11 @@ sed -i 's#Welcome to nginx#There is Rybin#g' index.html
 
 在基础的容器使用中存在容器与数据耦合的问题，即每一个容器有自己的数据，多容器无法共享数据，并且当容器因为升级、更新等原因需要删除重启时会导致数据丢失。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\容器数据耦合问题.png)
+![](assets/SpringCloud.assets/容器数据耦合问题.png)
 
 数据卷技术将容器的存储目录映射到宿主主机的某个目录，当容器写入数据时，更改会反应在宿主主机的目录中，因此数据不再和容器耦合，数据同时存储在了宿主主机中；同样地，在宿主主机更改数据也可以直接影响挂载在数据卷下的容器，能够解决我们上面遇到的问题。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\数据卷.png)
+![](assets/SpringCloud.assets/数据卷.png)
 
 #### 数据卷操作
 
@@ -1224,7 +1230,7 @@ docker run --name ns -v html:/usr/share/nginx/html -p 80:80 -d nginx
 
 Docker镜像的构建是分层的，其中EntryPoint和BaseImage尤为重要，前者提供运行镜像的入口，后者需要提供应用依赖的系统函数库、环境、配置等。另外，这种分层结构使得镜像需要更新升级时，可以不用从头开始构建，只需把过时的Layer剔除更新即可，一定程度上得到了复用性。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\镜像结构.png)
+![](assets/SpringCloud.assets/镜像结构.png)
 
 #### Dockerfile
 
@@ -1232,7 +1238,7 @@ Dockerfile是一个用于构建镜像的文本文件，其中包含一个个指�
 
 一些常用指令如下：
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\dockerfile常用指令.png)
+![](assets/SpringCloud.assets/dockerfile常用指令.png)
 
 更详尽的指令可以参考官方文档。
 
@@ -1393,13 +1399,13 @@ docker pull http://192.168.150.101:8080/nginx:1.0
 
 我们之前使用的Feign属于同步通信，同步通信时效性好，但是因为其调用会阻塞，会带来很多问题。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\同步调用问题.png)
+![](assets/SpringCloud.assets/同步调用问题.png)
 
 ### 异步通信
 
 异步调用方案最常用的是事件驱动模式：服务调用者并不直接调用服务，而是借助于Broker，服务调用者发通知给Broker后便继续处理自己的业务，不理会服务提供者的执行；服务提供者从Broker接收通知，接收到通知便执行自己的业务。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\异步通信优势.png)
+![](assets/SpringCloud.assets/异步通信优势.png)
 
 这种方式的优点：
 
@@ -1421,7 +1427,7 @@ MQ(Message queue)，即消息队列，也就是前文中事件驱动模式中的
 
 常见的MQ有以下几个：
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\各种消息队列.png)
+![](assets/SpringCloud.assets/各种消息队列.png)
 
 ### RabbitMQ
 
@@ -1436,7 +1442,7 @@ docker run -e RABBITMQ_DEFAULT_USER=rybin -e RABBITMQ_DEFAULT_PASS=123 --name mq
 
 #### RabbitMQ的结构
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\RabbitMQ.png)
+![](assets/SpringCloud.assets/RabbitMQ.png)
 
 channel是操作MQ的工具；queue缓存消息，负责提供消息给具体服务；exchange负责将收到的消息路由到queue中；VirtualHost是对queue、exchange的逻辑分组，完成了不同用户间的隔离功能，在图形化管理界面中一般一个用户拥有一个唯一的VirtualHost来管理自己的逻辑分组。**注意**，RabbitMQ中消息是**阅后即焚**的，即一个queue中的消息被读取一次之后就被销毁了。
 
@@ -1449,7 +1455,7 @@ channel是操作MQ的工具；queue缓存消息，负责提供消息给具体服
 
 - consumer：订阅者，处理队列中的消息
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\基础消息模型.png)
+![](assets/SpringCloud.assets/基础消息模型.png)
 
 ##### 消息发送/接收流程
 
@@ -1597,7 +1603,7 @@ public class AMQPListener {
 
 工作队列类似于基本消息队列，只是一个queue下同时连接了多个消费者，当发送消息很多时，多个消费者的模式可以提高消息处理速度，避免队列中消息堆积。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\工作队列.png)
+![](assets/SpringCloud.assets/工作队列.png)
 
 工作队列的代码与之前Spring AMQP实现的基本消息队列代码基本一致，只需要在监听者类写多个处理方法，并且监听同一个队列即可。
 
@@ -1617,7 +1623,7 @@ spring:
 
 发布订阅模型与之前的两个队列模型的区别在于允许将同一消息发送给多个消费者，通过加入了exchange来实现。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\发布订阅模型.png)
+![](assets/SpringCloud.assets/发布订阅模型.png)
 
 **注意：**exchange只能路由消息，不会保存消息，消息一旦路由失败就会丢失。
 
@@ -1625,9 +1631,9 @@ spring:
 
 Fanout Exchange会将接收到的消息路由到每一个跟其绑定的queue。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\fanout.png)
+![](assets/SpringCloud.assets/fanout.png)
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Exchange API.png)
+![](assets/SpringCloud.assets/Exchange API.png)
 
 接下来以一个publisher，2个queue分别对应1个consumer为例：
 
@@ -1702,7 +1708,7 @@ public void FanoutMQ()  {
 
 Direct Exchangge会将接收到的消息根据规则路由到指定的queue，因此被称为路由模式。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\direct exchange.png)
+![](assets/SpringCloud.assets/direct exchange.png)
 
 同样以该图为模板编写Java示例：
 
@@ -1756,7 +1762,7 @@ public void DirectMQ() {
 
 Topic Exchange和Direct Exchange类似，区别在于routingKey必须是多个单词的列表，以 . 分割。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\Topic exchange.png)
+![](assets/SpringCloud.assets/Topic exchange.png)
 
 以该图为模板编写Java示例：
 
@@ -1830,11 +1836,13 @@ public MessageConverter jacksonConverter() {
 
 ## 10 - Elastic Search
 
+[ElasticSearch笔记](./ElasticSearch.md)
+
 Elastic Search是一个强大的开源搜索引擎，可以从海量的数据中心快速找到需要的内容。
 
 以Elastic Search为核心，结合Kibana、Logstash和Beats构成了Elastic Stack（ELK），广泛地应用于日志数据分析、实时监控等领域。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\ELK.png)
+![](assets/SpringCloud.assets/ELK.png)
 
 Elastic Search是基于Apache的Lucene开发的，Lucene是一个易扩展、高性能（基于倒排索引）的搜索引擎类库，尽管它只支持Java语言，并且学习路线陡峭，但是很多定制搜索引擎都需要围绕它来创建。而基于其开发的ES则有着这些优势：支持分布式，可水平扩展，提供Restful接口，可以被任何语言调用。
 
@@ -1844,11 +1852,11 @@ Elastic Search是基于Apache的Lucene开发的，Lucene是一个易扩展、高
 
 Elastic Search则采用倒排索引。其中每一条数据被称为文档document，文档会根据语义划分为多个词语，称为词条term。倒排索引在维护文档时，会为文档分词出多个term，为每个term建立索引，每一个term可能会对应多个文档id，文档id能够查询到对应的文档，其中term应该是唯一的。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\倒排索引.png)
+![](assets/SpringCloud.assets/倒排索引.png)
 
 倒排索引在模糊查询时，会根据模糊查询字段去搜索包含字段的term，找出所有符合的文档。
 
-<img src="C:\Users\haiyunshi\Desktop\笔记\img\倒排索引查询.png"  />
+<img src="assets/SpringCloud.assets/倒排索引查询.png"  />
 
 ### 相关名词和概念
 
@@ -1866,11 +1874,11 @@ Elastic Search是面向文档存储的，相当于数据库中的一条数据。
 
 索引中文档的字段约束信息，类似于数据库中的表结构。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\ES概念.png)
+![](assets/SpringCloud.assets/ES概念.png)
 
 MySQL擅长于事务操作，可以确保数据的一致性和安全性；而ES不具备事务，但是其擅长海量数据的搜索、分析和计算。在实际情况下两者往往需要配合使用，而不是只使用其中一个并试图完全代替另一个的功能。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\MySQL&ES.png)
+![](assets/SpringCloud.assets/MySQL&ES.png)
 
 ### 部署单点ES
 
@@ -2505,7 +2513,7 @@ GET /hotel/_search
 
 当使用match查询时，文档结果会根据搜索词条的关联度打分，返回结果按分数降序排列。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\词条频率算法.png)
+![](assets/SpringCloud.assets/词条频率算法.png)
 
 TF-IDF和BM25都是用来计算文档得分的算法。其中ES5前TF-IDF算法使用较多，而新版本中则更多采用BM25算法。这是因为TF-IDF算法的得分会随词频增高而无限增大，而BM25算法改进了这一缺陷，使得词频对于分数的贡献有上界，并且得分增长更加平滑。
 
@@ -2515,7 +2523,7 @@ TF-IDF和BM25都是用来计算文档得分的算法。其中ES5前TF-IDF算法�
 
 function_score的三要素：过滤条件、算分函数、加权模式
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\function_score.png)
+![](assets/SpringCloud.assets/function_score.png)
 
 ##### Boolean查询
 
@@ -3061,7 +3069,7 @@ ES中的分词器(analyzer)分成三部分：
 - tokenizer：将文本按照一定规则切割成词条(term)。例如ik_smart、keyword。
 - tokenizer filters：将tokenizer输出的词条进一步处理。例如大小写转换、同义词转换、拼音转换等。
 
-![](C:\Users\haiyunshi\Desktop\笔记\img\分词器三部分.png)
+![](assets/SpringCloud.assets/分词器三部分.png)
 
 在创建索引库时，可以通过settings属性配置自定义analyzer：
 
@@ -3355,15 +3363,15 @@ void testSuggest() throws IOException {
 
 #### 数据同步问题的解决方案
 
-![](assets/SpringCloud.assets/1-17017656391662.png)
+![](assets/SpringCloud.assets/1-17017656391662-17017806184132.png)
 
 同步调用实现简单，但是耦合度高，若一个环节出错则会影响到别的环节。
 
-![](assets/SpringCloud.assets/1-17017656058041.png)
+![](assets/SpringCloud.assets/1-17017656058041-17017806184143.png)
 
 使用MQ中间件来异步通知ES服务完成数据同步，能够解除一定耦合，提高服务执行速度也能避免连环故障；但是需要依赖MQ的可靠性，MQ故障则会导致数据的不一致等问题。
 
-![](assets/SpringCloud.assets/1-17017657416333.png)
+![](assets/SpringCloud.assets/1-17017657416333-17017806184144.png)
 
 使用MySQL自带的binlog当MySQL写数据时binlog新增日志，只需要监听binlog即可在数据新增时自动为ES同步数据。这种方案完全解耦，但是binlog的开启会为MySQL服务器带来压力。
 
@@ -3372,3 +3380,4 @@ void testSuggest() throws IOException {
 #### ES集群结构
 
 单机的ES做数据存储会遇到两个问题：海量数据存储问题和单点故障问题。通过多台服务器构成ES集群能够解决这两个问题。
+
