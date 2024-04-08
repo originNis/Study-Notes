@@ -198,7 +198,7 @@ final class ServiceImpl implements Service {
 }
 ```
 
-# 1 - Spring Boot基础
+# 1 - Spring Boot基础	
 
 ## 简介
 
@@ -1130,7 +1130,7 @@ public Article providedSelectById(Integer id);
 
 ### 分步查询
 
-MyBatis支持一对一、一对多、多对多关系的查询。XML和注解都能完成这个工作。
+MyBatis支持一对一、一对多、多对多关系的**关联查询**。XML和注解都能完成这个工作。
 
 注解分别使用@One和@Many表示一对一、一对多的关系。
 
